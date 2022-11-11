@@ -43,7 +43,13 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
         .status(400)
         .send("Image URL is missing. Send the image_url via query parameters.");
     }
-    const result = await filterImageFromURL(req.query.image_url);
+    let result: string;
+    try {
+      result = await filterImageFromURL(req.query.image_url);
+    } catch (e: unknown) {
+      console.error(e);
+      res.status(500).send("An internal server error has occurred. Perhaps the given URL is pointing to an invalid image?");
+    }
     // This callback is called both on success and fail, so the image is deleted even if the download failed.
       res.sendFile(result, async () => {
         await deleteLocalFiles([result])
